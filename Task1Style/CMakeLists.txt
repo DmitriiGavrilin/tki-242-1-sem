@@ -1,0 +1,37 @@
+cmake_minimum_required(VERSION 3.16)
+project(DomainVariantTask1Style LANGUAGES CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+file(GLOB DOMAIN_SOURCES CONFIGURE_DEPENDS src/*.cpp)
+list(REMOVE_ITEM DOMAIN_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp")
+add_library(domain_library STATIC ${DOMAIN_SOURCES})
+target_include_directories(domain_library PUBLIC include)
+
+add_executable(domain_app src/main.cpp)
+target_link_libraries(domain_app PRIVATE domain_library)
+
+enable_testing()
+find_package(GTest QUIET)
+if(NOT GTest_FOUND)
+    include(FetchContent)
+    FetchContent_Declare(googletest
+        URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.zip)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+    FetchContent_MakeAvailable(googletest)
+endif()
+add_executable(domain_tests tests/tests.cpp)
+target_link_libraries(domain_tests PRIVATE domain_library GTest::gtest_main)
+add_test(NAME domain_tests COMMAND domain_tests)
+
+if(MSVC)
+    target_compile_options(domain_library PRIVATE /W4 /WX)
+    target_compile_options(domain_app PRIVATE /W4 /WX)
+    target_compile_options(domain_tests PRIVATE /W4 /WX)
+else()
+    target_compile_options(domain_library PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(domain_app PRIVATE -Wall -Wextra -Wpedantic -Werror)
+    target_compile_options(domain_tests PRIVATE -Wall -Wextra -Wpedantic -Werror)
+endif()
