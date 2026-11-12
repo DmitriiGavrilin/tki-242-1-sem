@@ -3,7 +3,7 @@
 namespace miit::algebra {
 class Task2 final : public Exercise {
 public:
-    using Exercise::Exercise;
+    Task2() : Exercise() {}
     void solve() override;
 };
 }
