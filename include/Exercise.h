@@ -7,9 +7,8 @@ protected:
     Matrix<int> matrix_;
     Generator* generator_;
 public:
-    explicit Exercise(Matrix<int> matrix, Generator* generator = nullptr);
-    virtual ~Exercise();
-    void fill();
+    explicit Exercise(Matrix<int> matrix, const Generator&generator);
+    virtual ~Exercise() = default;
     virtual void solve() = 0;
     Matrix<int> getMatrix() const;
 };
