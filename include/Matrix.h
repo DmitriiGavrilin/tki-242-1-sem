@@ -27,24 +27,36 @@ private:
 
 public:
     Matrix() = default;
-    Matrix(std::size_t rows, std::size_t columns, const T& value = T{})
+
+    Matrix(const std::size_t rows, const std::size_t columns, const T& value = T{})
         : data_(rows, std::vector<T>(columns, value)) {}
+
     explicit Matrix(const std::vector<std::vector<T>>& values) : data_(values) { validateRectangular(); }
+
     Matrix(const Matrix&) = default;
-    Matrix(Matrix&&) noexcept = default;
+
+    Matrix(Matrix&& other) noexcept : data_(std::move(other.data_)) {}
+
     ~Matrix() = default;
+
     Matrix& operator=(const Matrix&) = default;
-    Matrix& operator=(Matrix&&) noexcept = default;
 
-    std::vector<T>& operator[](std::size_t row) {
+    Matrix& operator=(Matrix&& other) noexcept {
+        if (this != &other) {
+            data_ = std::move(other.data_);
+        }
+        return *this;
+    }
+
+    std::vector<T>& operator[](const std::size_t row) {
         return data_[row];
     }
 
-    const std::vector<T>& operator[](std::size_t row) const {
+    const std::vector<T>& operator[](const std::size_t row) const {
         return data_[row];
     }
 
-    Matrix operator<<(std::size_t positions) const {
+    Matrix operator<<(const std::size_t positions) const {
         Matrix result(*this);
         for (auto& row : result.data_) {
             if (!row.empty()) {
@@ -55,7 +67,7 @@ public:
         return result;
     }
 
-    Matrix operator>>(std::size_t positions) const {
+    Matrix operator>>(const std::size_t positions) const {
         Matrix result(*this);
         for (auto& row : result.data_) {
             if (!row.empty()) {
@@ -70,22 +82,26 @@ public:
     std::size_t columns() const noexcept { return data_.empty() ? 0U : data_.front().size(); }
     bool empty() const noexcept { return rows() == 0U || columns() == 0U; }
 
-    void fill(Generator& generator) {
-        for (auto& row : data_) for (auto& value : row) value = static_cast<T>(generator.generate());
+    void fill(const Generator& generator) {
+        for (auto& row : data_) {
+            for (auto& value : row) {
+                value = static_cast<T>(generator.generate());
+            }
+        }
     }
 
-    void insertRow(std::size_t index, const std::vector<T>& row) {
+    void insertRow(const std::size_t index, const std::vector<T>& row) {
         if (index > rows()) throw std::out_of_range("Row insertion index is out of range");
         if (!data_.empty() && row.size() != columns()) throw std::invalid_argument("Inserted row has wrong size");
         data_.insert(data_.begin() + static_cast<std::ptrdiff_t>(index), row);
     }
 
-    void removeRow(std::size_t index) {
+    void removeRow(const std::size_t index) {
         if (index >= rows()) throw std::out_of_range("Row removal index is out of range");
         data_.erase(data_.begin() + static_cast<std::ptrdiff_t>(index));
     }
 
-    void insertColumn(std::size_t index, const std::vector<T>& column) {
+    void insertColumn(const std::size_t index, const std::vector<T>& column) {
         if (empty()) throw std::logic_error("Cannot insert a column into an empty matrix");
         if (index > columns()) throw std::out_of_range("Column insertion index is out of range");
         if (column.size() != rows()) throw std::invalid_argument("Inserted column has wrong size");
@@ -94,7 +110,7 @@ public:
         }
     }
 
-    void removeColumn(std::size_t index) {
+    void removeColumn(const std::size_t index) {
         if (index >= columns()) throw std::out_of_range("Column removal index is out of range");
         for (auto& row : data_) row.erase(row.begin() + static_cast<std::ptrdiff_t>(index));
     }
@@ -112,4 +128,4 @@ public:
     }
 };
 
-} // namespace miit::algebra
+}
