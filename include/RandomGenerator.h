@@ -7,7 +7,7 @@ private:
     std::mt19937 engine_;
     std::uniform_int_distribution<int> distribution_;
 public:
-    RandomGenerator(int minimum, int maximum);
+    RandomGenerator(const int minimum, const int maximum);
     int generate() override;
 };
 }
