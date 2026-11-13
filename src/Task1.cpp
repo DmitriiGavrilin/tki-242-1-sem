@@ -2,7 +2,6 @@
 #include "Task1.h"
 
 #include <algorithm>
-#include <cstddef>
 
 namespace miit::algebra {
 
@@ -20,7 +19,6 @@ void Task1::solve() {
         for (int& value : matrix_[r]) {
             if (value == maximum) {
                 value = 0;
-                break;
             }
         }
     }

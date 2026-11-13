@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "Generator.h"
@@ -18,7 +19,9 @@ private:
     std::vector<std::vector<T>> data_;
 
     void validateRectangular() const {
-        if (data_.empty()) return;
+        if (data_.empty()) {
+            return;
+        }
 
         const std::size_t width = data_.front().size();
 
@@ -58,6 +61,7 @@ public:
         if (this != &other) {
             data_ = std::move(other.data_);
         }
+
         return *this;
     }
 
@@ -129,7 +133,7 @@ public:
         return rows() == 0U || columns() == 0U;
     }
 
-    virtual void fill(const Generator& generator) {
+    virtual void fill(Generator& generator) {
         for (auto& row : data_) {
             for (auto& value : row) {
                 value = static_cast<T>(generator.generate());
@@ -175,9 +179,9 @@ public:
         const std::size_t index,
         const std::vector<T>& column
     ) {
-        if (empty()) {
+        if (rows() == 0U) {
             throw std::logic_error(
-                "Cannot insert a column into an empty matrix"
+                "Cannot insert a column into a matrix without rows"
             );
         }
 

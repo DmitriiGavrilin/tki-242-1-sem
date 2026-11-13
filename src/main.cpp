@@ -1,3 +1,4 @@
+
 #include "ConstantGenerator.h"
 #include "IStreamGenerator.h"
 #include "RandomGenerator.h"
@@ -39,14 +40,14 @@ T readValue(const char* prompt) {
 
 int main() {
     try {
-        std::size_t rows = 0U;
-        std::size_t columns = 0U;
+        std::size_t rows = 0;
+        std::size_t columns = 0;
 
-        while (rows == 0U) {
+        while (rows == 0) {
             rows = readValue<std::size_t>("Rows (> 0): ");
         }
 
-        while (columns == 0U) {
+        while (columns == 0) {
             columns = readValue<std::size_t>("Columns (> 0): ");
         }
 
@@ -80,8 +81,7 @@ int main() {
             }
 
             generator = std::make_unique<RandomGenerator>(
-                minimum,
-                maximum
+                minimum, maximum
             );
             break;
         }
@@ -95,16 +95,13 @@ int main() {
                 readValue<int>("Constant: ")
             );
             break;
-
-        default:
-            throw std::logic_error("Unexpected fill choice");
         }
 
         Matrix<int> original(rows, columns);
         original.fill(*generator);
 
         std::cout << "Initial matrix:\n"
-                  << original.toString() << '\n';
+                << original.toString() << '\n';
 
         bool running = true;
 
@@ -130,7 +127,7 @@ int main() {
                 task.solve();
 
                 std::cout << "Task 1 result:\n"
-                          << task.getMatrix().toString() << '\n';
+                        << task.getMatrix().toString() << '\n';
                 break;
             }
 
@@ -139,7 +136,7 @@ int main() {
                 task.solve();
 
                 std::cout << "Task 2 result:\n"
-                          << task.getMatrix().toString() << '\n';
+                        << task.getMatrix().toString() << '\n';
                 break;
             }
 
@@ -148,18 +145,15 @@ int main() {
                 task1.solve();
 
                 std::cout << "Task 1 result:\n"
-                          << task1.getMatrix().toString() << '\n';
+                        << task1.getMatrix().toString() << '\n';
 
                 Task2 task2(original, *generator);
                 task2.solve();
 
                 std::cout << "Task 2 result:\n"
-                          << task2.getMatrix().toString() << '\n';
+                        << task2.getMatrix().toString() << '\n';
                 break;
             }
-
-            default:
-                throw std::logic_error("Unexpected action");
             }
         }
 

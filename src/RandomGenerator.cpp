@@ -1,9 +1,30 @@
+
 #include "RandomGenerator.h"
+
 #include <stdexcept>
+#include <random>
+
 namespace miit::algebra {
-RandomGenerator::RandomGenerator(int minimum, int maximum)
-    : engine_(std::random_device{}()), distribution_(minimum, maximum) {
-    if (minimum > maximum) throw std::invalid_argument("Minimum must not exceed maximum");
+namespace {
+
+int validateMinimum(int minimum, int maximum) {
+    if (minimum > maximum) {
+        throw std::invalid_argument(
+            "Minimum must not exceed maximum"
+        );
+    }
+
+    return minimum;
 }
-int RandomGenerator::generate() { return distribution_(engine_); }
+
+}
+
+RandomGenerator::RandomGenerator(int minimum, int maximum)
+    : engine_(std::random_device{}()),
+    distribution_(validateMinimum(minimum, maximum), maximum) {}
+
+int RandomGenerator::generate() {
+    return distribution_(engine_);
+}
+
 }

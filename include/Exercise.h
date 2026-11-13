@@ -1,3 +1,4 @@
+
 #pragma once
 
 #include "Generator.h"
@@ -8,12 +9,12 @@ namespace miit::algebra {
 class Exercise {
 protected:
     Matrix<int> matrix_;
-    const Generator* generator_;
+    Generator* generator_;
 
 public:
     explicit Exercise(
         Matrix<int> matrix,
-        const Generator& generator
+        Generator* generator = nullptr
     );
 
     virtual ~Exercise();

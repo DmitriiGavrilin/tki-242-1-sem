@@ -1,6 +1,6 @@
+
 #include "Task2.h"
 
-#include <cstddef>
 #include <vector>
 
 namespace miit::algebra {
