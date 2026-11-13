@@ -9,12 +9,14 @@ namespace miit::algebra {
 class Exercise {
 protected:
     Matrix<int> matrix_;
-    Generator* generator_;
+    const Generator* generator_;
 
 public:
-    explicit Exercise(
+    explicit Exercise(Matrix<int> matrix);
+
+    Exercise(
         Matrix<int> matrix,
-        Generator* generator = nullptr
+        const Generator& generator
     );
 
     virtual ~Exercise();

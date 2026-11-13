@@ -6,7 +6,7 @@ class Generator {
 public:
     virtual ~Generator() = default;
 
-    virtual int generate() = 0;
+    virtual int generate() const = 0;
 };
 
 }

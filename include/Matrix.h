@@ -13,7 +13,7 @@
 
 namespace miit::algebra {
 
-template<typename T>
+template <typename T>
 class Matrix {
 private:
     std::vector<std::vector<T>> data_;
@@ -23,10 +23,10 @@ private:
             return;
         }
 
-        const std::size_t width = data_.front().size();
+        const std::size_t expectedColumns = data_[0].size();
 
         for (const auto& row : data_) {
-            if (row.size() != width) {
+            if (row.size() != expectedColumns) {
                 throw std::invalid_argument(
                     "Matrix rows must have equal length"
                 );
@@ -37,103 +37,48 @@ private:
 public:
     Matrix() = default;
 
-    Matrix(
-        const std::size_t rows,
-        const std::size_t columns,
-        const T& value = T{}
-    ) : data_(rows, std::vector<T>(columns, value)) {}
+    Matrix(std::size_t rows, std::size_t columns)
+        : data_(rows, std::vector<T>(columns)) {}
 
-    explicit Matrix(const std::vector<std::vector<T>>& values)
-        : data_(values) {
+    explicit Matrix(const std::vector<std::vector<T>>& data)
+        : data_(data) {
+        validateRectangular();
+    }
+
+    explicit Matrix(std::vector<std::vector<T>>&& data)
+        : data_(std::move(data)) {
         validateRectangular();
     }
 
     Matrix(const Matrix&) = default;
+    Matrix(Matrix&&) noexcept = default;
 
-    Matrix(Matrix&& other) noexcept
-        : data_(std::move(other.data_)) {}
+    Matrix& operator=(const Matrix&) = default;
+    Matrix& operator=(Matrix&&) noexcept = default;
 
     virtual ~Matrix() = default;
 
-    Matrix& operator=(const Matrix&) = default;
-
-    Matrix& operator=(Matrix&& other) noexcept {
-        if (this != &other) {
-            data_ = std::move(other.data_);
-        }
-
-        return *this;
-    }
-
-    std::vector<T>& operator[](const std::size_t row) {
-        if (row >= rows()) {
-            throw std::out_of_range(
-                "Matrix row index is out of range"
-            );
-        }
-
-        return data_[row];
-    }
-
-    const std::vector<T>& operator[](const std::size_t row) const {
-        if (row >= rows()) {
-            throw std::out_of_range(
-                "Matrix row index is out of range"
-            );
-        }
-
-        return data_[row];
-    }
-
-    Matrix operator<<(const std::size_t positions) const {
-        Matrix result(*this);
-
-        for (auto& row : result.data_) {
-            if (!row.empty()) {
-                const std::size_t shift = positions % row.size();
-
-                std::rotate(
-                    row.begin(),
-                    row.begin() + static_cast<std::ptrdiff_t>(shift),
-                    row.end()
-                );
-            }
-        }
-
-        return result;
-    }
-
-    Matrix operator>>(const std::size_t positions) const {
-        Matrix result(*this);
-
-        for (auto& row : result.data_) {
-            if (!row.empty()) {
-                const std::size_t shift = positions % row.size();
-
-                std::rotate(
-                    row.rbegin(),
-                    row.rbegin() + static_cast<std::ptrdiff_t>(shift),
-                    row.rend()
-                );
-            }
-        }
-
-        return result;
-    }
-
-    std::size_t rows() const noexcept {
+    std::size_t rows() const {
         return data_.size();
     }
 
-    std::size_t columns() const noexcept {
-        return data_.empty() ? 0U : data_.front().size();
+    std::size_t columns() const {
+        return data_.empty() ? 0 : data_[0].size();
     }
 
-    bool empty() const noexcept {
-        return rows() == 0U || columns() == 0U;
+    bool empty() const {
+        return data_.empty() || data_[0].empty();
     }
 
-    virtual void fill(Generator& generator) {
+    std::vector<T>& operator[](std::size_t index) {
+        return data_.at(index);
+    }
+
+    const std::vector<T>& operator[](std::size_t index) const {
+        return data_.at(index);
+    }
+
+    void fill(const Generator& generator) {
         for (auto& row : data_) {
             for (auto& value : row) {
                 value = static_cast<T>(generator.generate());
@@ -141,102 +86,90 @@ public:
         }
     }
 
-    void insertRow(
-        const std::size_t index,
-        const std::vector<T>& row
-    ) {
+    void shiftLeft() {
+        for (auto& row : data_) {
+            if (!row.empty()) {
+                std::rotate(row.begin(), row.begin() + 1, row.end());
+            }
+        }
+    }
+
+    void shiftRight() {
+        for (auto& row : data_) {
+            if (!row.empty()) {
+                std::rotate(row.rbegin(), row.rbegin() + 1, row.rend());
+            }
+        }
+    }
+
+    void insertRow(std::size_t index, const std::vector<T>& row) {
         if (index > rows()) {
-            throw std::out_of_range(
-                "Row insertion index is out of range"
-            );
+            throw std::out_of_range("Invalid row index");
         }
 
         if (!data_.empty() && row.size() != columns()) {
-            throw std::invalid_argument(
-                "Inserted row has wrong size"
-            );
+            throw std::invalid_argument("Invalid row size");
         }
 
-        data_.insert(
-            data_.begin() + static_cast<std::ptrdiff_t>(index),
-            row
-        );
+        if (data_.empty() && !row.empty()) {
+            for (const auto& existingRow : data_) {
+                if (existingRow.size() != row.size()) {
+                    throw std::invalid_argument("Invalid row size");
+                }
+            }
+        }
+
+        data_.insert(data_.begin() + index, row);
     }
 
-    void removeRow(const std::size_t index) {
+    void removeRow(std::size_t index) {
         if (index >= rows()) {
-            throw std::out_of_range(
-                "Row removal index is out of range"
-            );
+            throw std::out_of_range("Invalid row index");
         }
 
-        data_.erase(
-            data_.begin() + static_cast<std::ptrdiff_t>(index)
-        );
+        data_.erase(data_.begin() + index);
     }
 
-    void insertColumn(
-        const std::size_t index,
-        const std::vector<T>& column
-    ) {
-        if (rows() == 0U) {
-            throw std::logic_error(
-                "Cannot insert a column into a matrix without rows"
-            );
-        }
-
+    void insertColumn(std::size_t index, const std::vector<T>& column) {
         if (index > columns()) {
-            throw std::out_of_range(
-                "Column insertion index is out of range"
-            );
+            throw std::out_of_range("Invalid column index");
         }
 
         if (column.size() != rows()) {
-            throw std::invalid_argument(
-                "Inserted column has wrong size"
-            );
+            throw std::invalid_argument("Invalid column size");
         }
 
-        for (std::size_t row = 0; row < rows(); ++row) {
-            data_[row].insert(
-                data_[row].begin() + static_cast<std::ptrdiff_t>(index),
-                column[row]
-            );
+        for (std::size_t r = 0; r < rows(); ++r) {
+            data_[r].insert(data_[r].begin() + index, column[r]);
         }
     }
 
-    void removeColumn(const std::size_t index) {
+    void removeColumn(std::size_t index) {
         if (index >= columns()) {
-            throw std::out_of_range(
-                "Column removal index is out of range"
-            );
+            throw std::out_of_range("Invalid column index");
         }
 
         for (auto& row : data_) {
-            row.erase(
-                row.begin() + static_cast<std::ptrdiff_t>(index)
-            );
+            row.erase(row.begin() + index);
         }
     }
 
     std::string toString() const {
-        std::ostringstream out;
+        std::ostringstream output;
 
-        for (std::size_t row = 0; row < rows(); ++row) {
-            for (std::size_t column = 0; column < columns(); ++column) {
-                if (column != 0U) {
-                    out << ' ';
+        for (const auto& row : data_) {
+            for (std::size_t c = 0; c < row.size(); ++c) {
+                if (c > 0) {
+                    output << ' ';
                 }
 
-                out << data_[row][column];
+                output << row[c];
             }
 
-            if (row + 1U != rows()) {
-                out << '\n';
-            }
+            output << '\n';
         }
 
-        return out.str();
+        return output.str();
     }
 };
 

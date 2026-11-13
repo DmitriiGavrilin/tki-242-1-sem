@@ -1,8 +1,6 @@
-
 #include "RandomGenerator.h"
 
 #include <stdexcept>
-#include <random>
 
 namespace miit::algebra {
 namespace {
@@ -23,7 +21,7 @@ RandomGenerator::RandomGenerator(int minimum, int maximum)
     : engine_(std::random_device{}()),
     distribution_(validateMinimum(minimum, maximum), maximum) {}
 
-int RandomGenerator::generate() {
+int RandomGenerator::generate() const {
     return distribution_(engine_);
 }
 

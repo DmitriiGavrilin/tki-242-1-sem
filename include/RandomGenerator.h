@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "Generator.h"
@@ -9,13 +8,13 @@ namespace miit::algebra {
 
 class RandomGenerator final : public Generator {
 private:
-    std::mt19937 engine_;
-    std::uniform_int_distribution<int> distribution_;
+    mutable std::mt19937 engine_;
+    mutable std::uniform_int_distribution<int> distribution_;
 
 public:
-    RandomGenerator(const int minimum, const int maximum);
+    RandomGenerator(int minimum, int maximum);
 
-    int generate() override;
+    int generate() const override;
 };
 
 }
