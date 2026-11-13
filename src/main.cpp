@@ -1,4 +1,3 @@
-
 #include "ConstantGenerator.h"
 #include "IStreamGenerator.h"
 #include "RandomGenerator.h"
@@ -51,7 +50,9 @@ int main() {
             columns = readValue<std::size_t>("Columns (> 0): ");
         }
 
-        std::cout << "Fill: 1 - keyboard, 2 - random, 3 - zeros, 4 - constant\n";
+        std::cout
+            << "Fill: 1 - keyboard, 2 - random, "
+            << "3 - zeros, 4 - constant\n";
 
         int fillChoice = readValue<int>("Choice: ");
 
@@ -108,8 +109,9 @@ int main() {
         bool running = true;
 
         while (running) {
-            std::cout << "\n0 - exit, 1 - first transformation, "
-                         "2 - second transformation, 3 - both\n";
+            std::cout
+                << "\n0 - exit, 1 - first transformation, "
+                << "2 - second transformation, 3 - both\n";
 
             int action = readValue<int>("Action: ");
 
@@ -124,7 +126,7 @@ int main() {
                 break;
 
             case 1: {
-                Task1 task(original);
+                Task1 task(original, *generator);
                 task.solve();
 
                 std::cout << "Task 1 result:\n"
@@ -133,7 +135,7 @@ int main() {
             }
 
             case 2: {
-                Task2 task(original);
+                Task2 task(original, *generator);
                 task.solve();
 
                 std::cout << "Task 2 result:\n"
@@ -142,13 +144,13 @@ int main() {
             }
 
             case 3: {
-                Task1 task1(original);
+                Task1 task1(original, *generator);
                 task1.solve();
 
                 std::cout << "Task 1 result:\n"
                           << task1.getMatrix().toString() << '\n';
 
-                Task2 task2(original);
+                Task2 task2(original, *generator);
                 task2.solve();
 
                 std::cout << "Task 2 result:\n"
