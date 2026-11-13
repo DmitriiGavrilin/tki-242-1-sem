@@ -8,14 +8,20 @@ namespace miit::algebra {
 
 Exercise::Exercise(Matrix<int> matrix)
     : matrix_(std::move(matrix)),
-    generator_(nullptr) {}
+      generator_(nullptr) {}
 
 Exercise::Exercise(
     Matrix<int> matrix,
     const Generator& generator
 )
+    : Exercise(std::move(matrix), &generator) {}
+
+Exercise::Exercise(
+    Matrix<int> matrix,
+    const Generator* generator
+)
     : matrix_(std::move(matrix)),
-    generator_(&generator) {}
+      generator_(generator) {}
 
 Exercise::~Exercise() = default;
 

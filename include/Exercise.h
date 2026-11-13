@@ -19,6 +19,12 @@ public:
         const Generator& generator
     );
 
+    // Совместимость со старыми тестами.
+    Exercise(
+        Matrix<int> matrix,
+        const Generator* generator
+    );
+
     virtual ~Exercise();
 
     virtual void solve() = 0;

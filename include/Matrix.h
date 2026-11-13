@@ -40,6 +40,9 @@ public:
     Matrix(std::size_t rows, std::size_t columns)
         : data_(rows, std::vector<T>(columns)) {}
 
+    Matrix(std::size_t rows, std::size_t columns, const T& value)
+        : data_(rows, std::vector<T>(columns, value)) {}
+
     explicit Matrix(const std::vector<std::vector<T>>& data)
         : data_(data) {
         validateRectangular();
@@ -111,14 +114,6 @@ public:
             throw std::invalid_argument("Invalid row size");
         }
 
-        if (data_.empty() && !row.empty()) {
-            for (const auto& existingRow : data_) {
-                if (existingRow.size() != row.size()) {
-                    throw std::invalid_argument("Invalid row size");
-                }
-            }
-        }
-
         data_.insert(data_.begin() + index, row);
     }
 
@@ -131,6 +126,12 @@ public:
     }
 
     void insertColumn(std::size_t index, const std::vector<T>& column) {
+        if (rows() == 0) {
+            throw std::logic_error(
+                "Cannot insert a column into an empty matrix"
+            );
+        }
+
         if (index > columns()) {
             throw std::out_of_range("Invalid column index");
         }
@@ -157,20 +158,66 @@ public:
     std::string toString() const {
         std::ostringstream output;
 
-        for (const auto& row : data_) {
-            for (std::size_t c = 0; c < row.size(); ++c) {
+        for (std::size_t r = 0; r < data_.size(); ++r) {
+            for (std::size_t c = 0; c < data_[r].size(); ++c) {
                 if (c > 0) {
                     output << ' ';
                 }
 
-                output << row[c];
+                output << data_[r][c];
             }
 
-            output << '\n';
+            if (r + 1 < data_.size()) {
+                output << '\n';
+            }
         }
 
         return output.str();
     }
 };
+
+// Циклический сдвиг каждой строки влево.
+template <typename T>
+Matrix<T> operator<<(const Matrix<T>& matrix, unsigned int shift) {
+    Matrix<T> result(matrix);
+
+    for (std::size_t r = 0; r < result.rows(); ++r) {
+        auto& row = result[r];
+
+        if (!row.empty()) {
+            const std::size_t offset = shift % row.size();
+
+            std::rotate(
+                row.begin(),
+                row.begin() + offset,
+                row.end()
+            );
+        }
+    }
+
+    return result;
+}
+
+// Циклический сдвиг каждой строки вправо.
+template <typename T>
+Matrix<T> operator>>(const Matrix<T>& matrix, unsigned int shift) {
+    Matrix<T> result(matrix);
+
+    for (std::size_t r = 0; r < result.rows(); ++r) {
+        auto& row = result[r];
+
+        if (!row.empty()) {
+            const std::size_t offset = shift % row.size();
+
+            std::rotate(
+                row.begin(),
+                row.end() - offset,
+                row.end()
+            );
+        }
+    }
+
+    return result;
+}
 
 }
